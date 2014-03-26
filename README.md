@@ -80,6 +80,42 @@ reflect
 
 ```
 
+#### Reflection Classes
+```php
+  ReflectionDatabase::name
+  ReflectionDatabase::charset
+  ReflectionDatabase::collation
+  ReflectionDatabase::tables
+
+  ReflectionTable::name
+  ReflectionTable::type
+  ReflectionTable::length
+  ReflectionTable::maxLength
+  ReflectionTable::increment
+  ReflectionTable::createdAt
+  ReflectionTable::updatedAt
+  ReflectionTable::checksum
+  ReflectionTable::options
+  ReflectionTable::comment
+  ReflectionTable::database
+  ReflectionTable::columns
+
+  ReflectionColumn::name;
+  ReflectionColumn::position
+  ReflectionColumn::defaultValue
+  ReflectionColumn::isNullable
+  ReflectionColumn::dataType
+  ReflectionColumn::precision
+  ReflectionColumn::maxLength
+  ReflectionColumn::columnType
+  ReflectionColumn::charSet
+  ReflectionColumn::key
+  ReflectionColumn::extra
+  ReflectionColumn::privileges
+  ReflectionColumn::comment
+  ReflectionColumn::parentItem
+```
+
 ## License ##
 DbReflection is released under a BSD 3-Clause License
 

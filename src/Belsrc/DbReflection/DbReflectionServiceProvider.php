@@ -1,9 +1,11 @@
 <?php namespace Belsrc\DbReflection;
 
+    use Config;
     use Illuminate\Support\ServiceProvider;
     use Belsrc\DbReflection\Commands\ReflectDatabaseCommand;
     use Belsrc\DbReflection\Commands\ReflectTableCommand;
     use Belsrc\DbReflection\Commands\ReflectColumnCommand;
+    use Belsrc\DbReflection\Query\Query;
 
     class DbReflectionServiceProvider extends ServiceProvider {
 
@@ -41,8 +43,13 @@
          * @return void
          */
         protected function registerClass() {
-            $this->app['db-reflection'] = $this->app->share( function( $app ) {
-                return new DbReflection();
+            $default = Config::get( 'database.default' );
+            $conInfo = Config::get( 'database.connections' )[$default];
+            $conStr  = 'mysql:host=' . $conInfo['host'] . ';dbname=information_schema';
+            $pdo     = new \PDO( $conStr, $conInfo['username'], $conInfo['password'] );
+
+            $this->app['db-reflection'] = $this->app->share( function( $app ) use( $pdo ) {
+                return new DbReflection( new Query( $pdo ) );
             });
         }
 
