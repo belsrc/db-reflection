@@ -100,7 +100,7 @@ reflect
   ReflectionTable::database
   ReflectionTable::columns
 
-  ReflectionColumn::name;
+  ReflectionColumn::name
   ReflectionColumn::position
   ReflectionColumn::defaultValue
   ReflectionColumn::isNullable
