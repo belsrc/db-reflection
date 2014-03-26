@@ -26,8 +26,8 @@
         "mockery/mockery": "0.9.*"
     },
     "autoload": {
-        "psr-0": {
-            "Belsrc\\DbReflection": "src/"
+        "psr-4": {
+            "Belsrc\\DbReflection\\": "src/"
         }
     },
     "minimum-stability": "stable"
