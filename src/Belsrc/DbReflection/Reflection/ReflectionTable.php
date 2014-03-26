@@ -18,6 +18,10 @@
 
         }
 
+        public function columns() {
+
+        }
+
         /**
          * Gets a class property.
          *
