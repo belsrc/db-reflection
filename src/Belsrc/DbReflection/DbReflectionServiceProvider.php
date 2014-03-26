@@ -4,6 +4,7 @@
     use Belsrc\DbReflection\Commands\ReflectDatabaseCommand;
     use Belsrc\DbReflection\Commands\ReflectTableCommand;
     use Belsrc\DbReflection\Commands\ReflectColumnCommand;
+    use Belsrc\DbReflection\Query\Query;
 
     class DbReflectionServiceProvider extends ServiceProvider {
 
@@ -42,7 +43,7 @@
          */
         protected function registerClass() {
             $this->app['db-reflection'] = $this->app->share( function( $app ) {
-                return new DbReflection();
+                return new DbReflection( new Query( \DB::connection()->getPdo() ) );
             });
         }
 

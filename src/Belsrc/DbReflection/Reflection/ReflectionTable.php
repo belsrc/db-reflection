@@ -2,6 +2,18 @@
 
     class ReflectionTable {
 
+        public $name;
+        public $type;
+        public $length;
+        public $maxLength;
+        public $increment;
+        public $createdAt;
+        public $updatedAt;
+        public $checksum;
+        public $options;
+        public $comment;
+        public $database;
+
         public function __construct() {
 
         }
@@ -13,12 +25,8 @@
          * @return mixed           The value of the property.
          */
         public function __get( $property ) {
-            // If there is a getter method for the property
-            // call that method. Lets you drop the parenthesis and
-            // acts a little more like other language getters.
-            $m = 'get' . ucwords( $property );
-            if( method_exists( $this, $m ) ) {
-                return $this->$m();
+            if( method_exists( $this, $property ) ) {
+                return $this->$property();
             }
 
             if( property_exists( $this, $property ) ) {

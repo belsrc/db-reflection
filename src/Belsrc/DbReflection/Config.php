@@ -20,6 +20,7 @@
                 'checksum',
                 'create_options as options',
                 'table_comment as comment',
+                "table_schema as 'database'",
             ),
 
             'column' => array(
@@ -28,15 +29,16 @@
                 'column_default as defaultValue',
                 'is_nullable as isNullable',
                 'data_type as dataType',
-                'numeric_precision as precision',
+                "numeric_precision as 'precision'",
                 'character_maximum_length as maxLength',
                 'column_type as columnType',
                 'character_set_name as charset',
-                'column_key as key',
+                "column_key as 'key'",
                 'extra',
                 'privileges',
                 'column_comment as comment',
-                'table_name as table',
+                "table_name as 'table'",
+                "table_schema as 'database'",
             ),
         );
 
