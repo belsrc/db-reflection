@@ -1,13 +1,11 @@
 <?php namespace Belsrc\DbReflection\Commands;
 
-    use Illuminate\Console\Command;
     use Symfony\Component\Console\Input\InputOption;
     use Symfony\Component\Console\Input\InputArgument;
     use Belsrc\DbReflection\DbReflection;
     use Belsrc\DbReflection\Query\Query;
-    use Belsrc\DbReflection\Display\Display;
 
-    class ReflectColumnCommand extends Command {
+    class ReflectColumnCommand extends BaseReflectCommand {
 
         /**
          * The console command name.
@@ -24,26 +22,18 @@
         protected $description = 'Get the information about a particular column.';
 
         /**
-         * Create a new command instance.
-         *
-         * @return void
-         */
-        public function __construct() {
-            parent::__construct();
-        }
-
-        /**
          * Execute the console command.
          *
          * @return mixed
          */
         public function fire() {
             try {
+                $pdo  = $this->getPdoConnection();
                 $path = $this->argument( 'path' );
-                $dbr  = new DbReflection( new Query() );
+                $dbr  = new DbReflection( new Query( $pdo ) );
                 $tmp  = $dbr->getColumn( $path );
-                $display = new Display();
-                echo $display->display( $tmp );
+
+                echo $this->_display->display( $tmp );
             }
             catch( Exception $e ) {
                 $this->error( $e->getMessage() );

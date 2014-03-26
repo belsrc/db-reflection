@@ -1,5 +1,7 @@
 <?php namespace Belsrc\DbReflection;
 
+    use Belsrc\DbReflection\Query;
+
     class DbReflection {
 
         private $_query;
@@ -9,7 +11,7 @@
          *
          * @param Belsrc\DbReflection\Query\IQuery $query An IQuery instance.
          */
-        public function __construct( $query ) {
+        public function __construct( Query\IQuery $query ) {
             $this->_query = $query;
         }
 
