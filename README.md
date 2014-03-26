@@ -32,9 +32,9 @@ $col = DbReflection::getColumn( 'database.table.column' );
 If using Laravel, the package will also expose a few artisan command.
 ```bash
 reflect
-  reflect:column      Get the information about a particular column.
-  reflect:database    Get the information about a particular database.
-  reflect:table       Get the information about a particular table.
+  reflect:column [path]        Get the information about a particular column.
+  reflect:database [database]  Get the information about a particular database.
+  reflect:table [path]         Get the information about a particular table.
 
 
   php artisan reflect:database mocking_db
