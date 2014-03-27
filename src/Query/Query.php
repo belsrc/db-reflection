@@ -28,7 +28,7 @@
          * @param  string $fetchClass The class to use if fetch type is FETCH_CLASS.
          * @return array
          */
-        private function query( $string, array $params, $fetchType=\PDO::FETCH_ASSOC, $fetchClass='' ) {
+        private function query( $string, array $params=array(), $fetchType=\PDO::FETCH_ASSOC, $fetchClass='' ) {
             $statement = $this->_pdo->prepare( $string );
 
             if( $fetchType == \PDO::FETCH_CLASS ) {
