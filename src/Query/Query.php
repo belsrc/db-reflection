@@ -19,6 +19,21 @@
             $this->_pdo->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
         }
 
+        private function query( $string, array $params, $fetchType=\PDO::FETCH_ASSOC, $fetchClass='' ) {
+            $statement = $this->_pdo->prepare( $string );
+
+            if( $fetchType == \PDO::FETCH_CLASS ) {
+                $statement->setFetchMode( $fetchType, $fetchClass );
+            }
+            else {
+                $statement->setFetchMode( $fetchType );
+            }
+
+            $statement->execute( $params );
+
+            return $statement->fetchAll();
+        }
+
         /**
          * Gets a list of tables from the specified database.
          *
@@ -27,12 +42,10 @@
          */
         public function getDatabaseTables( $database ) {
             $tmp = array();
-            $statement = $this->_pdo->prepare(
-                "SELECT table_name as 'name' FROM `tables` WHERE `table_schema` = :db"
+            $result = $this->query(
+                "SELECT table_name as 'name' FROM `tables` WHERE `table_schema` = :db",
+                array( 'db' => $database )
             );
-            $statement->setFetchMode( \PDO::FETCH_ASSOC );
-            $statement->execute( array( 'db' => $database ) );
-            $result = $statement->fetchAll();
 
             foreach( $result as $row ) {
                 $tmp[] = $row['name'];
@@ -50,12 +63,10 @@
          */
         public function getTableColumns( $database, $table ) {
             $tmp = array();
-            $statement = $this->_pdo->prepare(
-                "SELECT column_name as 'name' FROM `columns` WHERE `table_schema` = :db AND `table_name` = :table"
+            $result = $this->query(
+                "SELECT column_name as 'name' FROM `columns` WHERE `table_schema` = :db AND `table_name` = :table",
+                array( 'db' => $database, 'table' => $table )
             );
-            $statement->setFetchMode( \PDO::FETCH_ASSOC );
-            $statement->execute( array( 'db' => $database, 'table' => $table ) );
-            $result = $statement->fetchAll();
 
             foreach( $result as $row ) {
                 $tmp[] = $row['name'];
@@ -74,12 +85,12 @@
          */
         public function getColumnConstraints( $database, $table, $column ) {
             $selects = implode( ',', Config::get( 'selects.constraint' ) );
-            $statement = $this->_pdo->prepare(
-                "SELECT $selects FROM `key_column_usage` WHERE `table_schema` = :database AND `table_name` = :table AND `column_name` = :column"
+            $result = $this->query(
+                "SELECT $selects FROM `key_column_usage` WHERE `table_schema` = :db AND `table_name` = :table AND `column_name` = :column",
+                array( 'db' => $database, 'table' => $table, 'column' => $column ),
+                \PDO::FETCH_CLASS,
+                'Belsrc\DbReflection\Reflection\ReflectionConstraint'
             );
-            $statement->setFetchMode( \PDO::FETCH_CLASS, 'Belsrc\DbReflection\Reflection\ReflectionConstraint' );
-            $statement->execute( array( 'db' => $database, 'table' => $table ) );
-            $result = $statement->fetchAll();
 
             foreach( $result as $row ) {
                 if( strtolower( $row->name ) == 'primary' ) {
@@ -101,14 +112,15 @@
          */
         public function sqlDatabase( $database ) {
             $selects = implode( ',', Config::get( 'selects.db' ) );
-            $statement = $this->_pdo->prepare(
-                "SELECT $selects FROM `schemata` WHERE `schema_name` = :value"
+            $result = $this->query(
+                "SELECT $selects FROM `schemata` WHERE `schema_name` = :value",
+                array( 'value' => $database ),
+                \PDO::FETCH_CLASS,
+                'Belsrc\DbReflection\Reflection\ReflectionDatabase'
             );
-            $statement->setFetchMode( \PDO::FETCH_CLASS, 'Belsrc\DbReflection\Reflection\ReflectionDatabase' );
-            $result = $statement->execute( array( 'value' => $database ) );
 
             if( count( $result ) ) {
-                $dbObj = $statement->fetch();
+                $dbObj = $result[0];
                 $dbObj->tables = $this->getDatabaseTables( $database );
 
                 return $dbObj;
@@ -127,14 +139,15 @@
          */
         public function sqlTable( $table, $database ) {
             $selects = implode( ',', Config::get( 'selects.table' ) );
-            $statement = $this->_pdo->prepare(
-                "SELECT $selects FROM `tables` WHERE `table_schema` = :db AND `table_name` = :table"
+            $result = $this->query(
+                "SELECT $selects FROM `tables` WHERE `table_schema` = :db AND `table_name` = :table",
+                array( 'db' => $database, 'table' => $table ),
+                \PDO::FETCH_CLASS,
+                'Belsrc\DbReflection\Reflection\ReflectionTable'
             );
-            $statement->setFetchMode( \PDO::FETCH_CLASS, 'Belsrc\DbReflection\Reflection\ReflectionTable' );
-            $result = $statement->execute( array( 'db' => $database, 'table' => $table ) );
 
             if( count( $result ) ) {
-                $dbObj = $statement->fetch();
+                $dbObj = $result[0];
                 $dbObj->columns = $this->getTableColumns( $database, $table );
 
                 return $dbObj;
@@ -154,14 +167,15 @@
          */
         public function sqlColumn( $column, $table, $database ) {
             $selects = implode( ',', Config::get( 'selects.column' ) );
-            $statement = $this->_pdo->prepare(
-                "SELECT $selects FROM `columns` WHERE `table_schema` = :db AND `table_name` = :table AND `column_name` = :column"
+            $result = $this->query(
+                "SELECT $selects FROM `columns` WHERE `table_schema` = :db AND `table_name` = :table AND `column_name` = :column",
+                array( 'db' => $database, 'table' => $table, 'column' => $column ),
+                \PDO::FETCH_CLASS,
+                'Belsrc\DbReflection\Reflection\ReflectionColumn'
             );
-            $statement->setFetchMode( \PDO::FETCH_CLASS, 'Belsrc\DbReflection\Reflection\ReflectionColumn' );
-            $result = $statement->execute( array( 'db' => $database, 'table' => $table, 'column' => $column ) );
 
             if( count( $result ) ) {
-                $dbObj = $statement->fetch();
+                $dbObj = $result[0];
                 $dbObj->constraints = $this->getColumnConstraints( $database, $table, $column );
 
                 return $dbObj;

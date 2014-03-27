@@ -15,7 +15,8 @@
         public $extra;
         public $privileges;
         public $comment;
-        public $parentItem;
+        public $table;
+        public $database;
 
         public $constraints;
     }
