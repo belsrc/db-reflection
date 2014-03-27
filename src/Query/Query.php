@@ -19,6 +19,12 @@
             $this->_pdo->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
         }
 
+        /**
+         * Gets a list of tables from the specified database.
+         *
+         * @param  string $database The name of the database.
+         * @return array
+         */
         public function getDatabaseTables( $database ) {
             $tmp = array();
             $statement = $this->_pdo->prepare(
@@ -35,6 +41,13 @@
             return $tmp;
         }
 
+        /**
+         * Gets a list of columns from the specified table.
+         *
+         * @param  string $database The name of the database.
+         * @param  string $table    The name of the table.
+         * @return array
+         */
         public function getTableColumns( $database, $table ) {
             $tmp = array();
             $statement = $this->_pdo->prepare(
@@ -51,8 +64,33 @@
             return $tmp;
         }
 
-        public function getColumnConstraints( $column, $table, $database ) {
+        /**
+         * Gets a list of constraints from the specified column.
+         *
+         * @param  string $database The name of the database.
+         * @param  string $table    The name of the table.
+         * @param  string $column   The name of the column.
+         * @return array
+         */
+        public function getColumnConstraints( $database, $table, $column ) {
+            $selects = implode( ',', Config::get( 'selects.constraint' ) );
+            $statement = $this->_pdo->prepare(
+                "SELECT $selects FROM `key_column_usage` WHERE `table_schema` = :database AND `table_name` = :table AND `column_name` = :column"
+            );
+            $statement->setFetchMode( \PDO::FETCH_CLASS, 'Belsrc\DbReflection\Reflection\ReflectionConstraint' );
+            $statement->execute( array( 'db' => $database, 'table' => $table ) );
+            $result = $statement->fetchAll();
 
+            foreach( $result as $row ) {
+                if( strtolower( $row->name ) == 'primary' ) {
+                    $row->type == $row->name;
+                }
+                else {
+                    $row->type == 'FOREIGN';
+                }
+            }
+
+            return $tmp;
         }
 
         /**
@@ -123,7 +161,10 @@
             $result = $statement->execute( array( 'db' => $database, 'table' => $table, 'column' => $column ) );
 
             if( count( $result ) ) {
-                return $statement->fetch();
+                $dbObj = $statement->fetch();
+                $dbObj->constraints = $this->getColumnConstraints( $database, $table, $column );
+
+                return $dbObj;
             }
             else {
                 throw new PDOException( "Unknown database in table (path: $database, table: information_schema.schemata)" );

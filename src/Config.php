@@ -40,6 +40,16 @@
                 "table_name as 'table'",
                 "table_schema as 'database'",
             ),
+
+            'constraint' => array(
+                "constraint_name as 'name'",
+                "column_name as 'column'",
+                "table_name as 'table'",
+                "table_schema as 'database'",
+                "referenced_table_schema as 'foreign_db'",
+                "referenced_table_name as 'foreign_table'",
+                "referenced_column_name as 'foreign_column'",
+            )
         );
 
         /**

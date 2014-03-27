@@ -7,4 +7,7 @@
         public $column;
         public $table;
         public $database;
+        public $foreign_db;
+        public $foreign_table;
+        public $foreign_column;
     }
