@@ -19,6 +19,42 @@
             $this->_pdo->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
         }
 
+        public function getDatabaseTables( $database ) {
+            $tmp = array();
+            $statement = $this->_pdo->prepare(
+                "SELECT table_name as 'name' FROM `tables` WHERE `table_schema` = :db"
+            );
+            $statement->setFetchMode( \PDO::FETCH_ASSOC );
+            $statement->execute( array( 'db' => $database ) );
+            $result = $statement->fetchAll();
+
+            foreach( $result as $row ) {
+                $tmp[] = $row['name'];
+            }
+
+            return $tmp;
+        }
+
+        public function getTableColumns( $database, $table ) {
+            $tmp = array();
+            $statement = $this->_pdo->prepare(
+                "SELECT column_name as 'name' FROM `columns` WHERE `table_schema` = :db AND `table_name` = :table"
+            );
+            $statement->setFetchMode( \PDO::FETCH_ASSOC );
+            $statement->execute( array( 'db' => $database, 'table' => $table ) );
+            $result = $statement->fetchAll();
+
+            foreach( $result as $row ) {
+                $tmp[] = $row['name'];
+            }
+
+            return $tmp;
+        }
+
+        public function getColumnConstraints( $column, $table, $database ) {
+
+        }
+
         /**
          * Get the database from the database meta data.
          *
@@ -34,7 +70,10 @@
             $result = $statement->execute( array( 'value' => $database ) );
 
             if( count( $result ) ) {
-                return $statement->fetch();
+                $dbObj = $statement->fetch();
+                $dbObj->tables = $this->getDatabaseTables( $database );
+
+                return $dbObj;
             }
             else {
                 throw new PDOException( "Unknown database in table (path: $database, table: information_schema.schemata)" );
@@ -57,7 +96,10 @@
             $result = $statement->execute( array( 'db' => $database, 'table' => $table ) );
 
             if( count( $result ) ) {
-                return $statement->fetch();
+                $dbObj = $statement->fetch();
+                $dbObj->columns = $this->getTableColumns( $database, $table );
+
+                return $dbObj;
             }
             else {
                 throw new PDOException( "Unknown database in table (path: $database, table: information_schema.schemata)" );

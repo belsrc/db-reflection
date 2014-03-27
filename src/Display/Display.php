@@ -17,8 +17,15 @@
                     $propCount = strlen( $key );
                 }
 
-                if( strlen( $val ) > $valCount ) {
-                    $valCount = strlen( $val );
+                if( is_array( $val ) ) {
+                    if( strlen( count( $val ) ) > $valCount ) {
+                        $valCount = strlen( count( $val ) );
+                    }
+                }
+                else {
+                    if( strlen( $val ) > $valCount ) {
+                        $valCount = strlen( $val );
+                    }
                 }
             }
 
@@ -62,6 +69,11 @@
          */
         private function buildRow( $key, $val, $keyMax, $valMax ) {
             $keyPad = $keyMax - strlen( $key );
+
+            if( is_array( $val ) ) {
+                $val = count( $val );
+            }
+
             $valPad = $valMax - strlen( $val );
 
             $str = "| $key";
