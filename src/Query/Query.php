@@ -19,6 +19,15 @@
             $this->_pdo->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
         }
 
+        /**
+         * Builds and fetches a query from the database.
+         *
+         * @param  string $string     The query string to use.
+         * @param  array  $params     An array of query string parameters.
+         * @param  int    $fetchType  The PDO fetch type.
+         * @param  string $fetchClass The class to use if fetch type is FETCH_CLASS.
+         * @return array
+         */
         private function query( $string, array $params, $fetchType=\PDO::FETCH_ASSOC, $fetchClass='' ) {
             $statement = $this->_pdo->prepare( $string );
 
