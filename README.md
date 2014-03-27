@@ -109,11 +109,12 @@ reflect
   ReflectionColumn::maxLength
   ReflectionColumn::columnType
   ReflectionColumn::charSet
-  ReflectionColumn::key
   ReflectionColumn::extra
   ReflectionColumn::privileges
   ReflectionColumn::comment
-  ReflectionColumn::parentItem
+  ReflectionColumn::table
+  ReflectionColumn::database
+  ReflectionColumn::constraints
 ```
 
 ## License ##
