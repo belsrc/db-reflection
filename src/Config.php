@@ -32,14 +32,23 @@
                 "numeric_precision as 'precision'",
                 'character_maximum_length as maxLength',
                 'column_type as columnType',
-                'character_set_name as charset',
-                "column_key as 'key'",
+                'character_set_name as charSet',
                 'extra',
                 'privileges',
                 'column_comment as comment',
                 "table_name as 'table'",
                 "table_schema as 'database'",
             ),
+
+            'constraint' => array(
+                "constraint_name as 'name'",
+                "column_name as 'column'",
+                "table_name as 'table'",
+                "table_schema as 'database'",
+                "referenced_table_schema as 'foreign_db'",
+                "referenced_table_name as 'foreign_table'",
+                "referenced_column_name as 'foreign_column'",
+            )
         );
 
         /**

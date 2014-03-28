@@ -20,6 +20,100 @@
         }
 
         /**
+         * Builds and fetches a query from the database.
+         *
+         * @param  string $string     The query string to use.
+         * @param  array  $params     An array of query string parameters.
+         * @param  int    $fetchType  The PDO fetch type.
+         * @param  string $fetchClass The class to use if fetch type is FETCH_CLASS.
+         * @return array
+         */
+        private function query( $string, array $params=array(), $fetchType=\PDO::FETCH_ASSOC, $fetchClass='' ) {
+            $statement = $this->_pdo->prepare( $string );
+
+            if( $fetchType == \PDO::FETCH_CLASS ) {
+                $statement->setFetchMode( $fetchType, $fetchClass );
+            }
+            else {
+                $statement->setFetchMode( $fetchType );
+            }
+
+            $statement->execute( $params );
+
+            return $statement->fetchAll();
+        }
+
+        /**
+         * Gets a list of tables from the specified database.
+         *
+         * @param  string $database The name of the database.
+         * @return array
+         */
+        public function getDatabaseTables( $database ) {
+            $tmp = array();
+            $result = $this->query(
+                "SELECT table_name as 'name' FROM `tables` WHERE `table_schema` = :db",
+                array( 'db' => $database )
+            );
+
+            foreach( $result as $row ) {
+                $tmp[] = $row['name'];
+            }
+
+            return $tmp;
+        }
+
+        /**
+         * Gets a list of columns from the specified table.
+         *
+         * @param  string $database The name of the database.
+         * @param  string $table    The name of the table.
+         * @return array
+         */
+        public function getTableColumns( $database, $table ) {
+            $tmp = array();
+            $result = $this->query(
+                "SELECT column_name as 'name' FROM `columns` WHERE `table_schema` = :db AND `table_name` = :table",
+                array( 'db' => $database, 'table' => $table )
+            );
+
+            foreach( $result as $row ) {
+                $tmp[] = $row['name'];
+            }
+
+            return $tmp;
+        }
+
+        /**
+         * Gets a list of constraints from the specified column.
+         *
+         * @param  string $database The name of the database.
+         * @param  string $table    The name of the table.
+         * @param  string $column   The name of the column.
+         * @return array
+         */
+        public function getColumnConstraints( $database, $table, $column ) {
+            $selects = implode( ',', Config::get( 'selects.constraint' ) );
+            $result = $this->query(
+                "SELECT $selects FROM `key_column_usage` WHERE `table_schema` = :db AND `table_name` = :table AND `column_name` = :column",
+                array( 'db' => $database, 'table' => $table, 'column' => $column ),
+                \PDO::FETCH_CLASS,
+                'Belsrc\DbReflection\Reflection\ReflectionConstraint'
+            );
+
+            foreach( $result as $row ) {
+                if( strtolower( $row->name ) == 'primary' ) {
+                    $row->type = 'Primary Key';
+                }
+                else {
+                    $row->type = 'Foreign Key';
+                }
+            }
+
+            return $result;
+        }
+
+        /**
          * Get the database from the database meta data.
          *
          * @param  string $database The name of the database to get.
@@ -27,14 +121,18 @@
          */
         public function sqlDatabase( $database ) {
             $selects = implode( ',', Config::get( 'selects.db' ) );
-            $statement = $this->_pdo->prepare(
-                "SELECT $selects FROM `schemata` WHERE `schema_name` = :value"
+            $result = $this->query(
+                "SELECT $selects FROM `schemata` WHERE `schema_name` = :value",
+                array( 'value' => $database ),
+                \PDO::FETCH_CLASS,
+                'Belsrc\DbReflection\Reflection\ReflectionDatabase'
             );
-            $statement->setFetchMode( \PDO::FETCH_CLASS, 'Belsrc\DbReflection\Reflection\ReflectionDatabase' );
-            $result = $statement->execute( array( 'value' => $database ) );
 
             if( count( $result ) ) {
-                return $statement->fetch();
+                $dbObj = $result[0];
+                $dbObj->tables = $this->getDatabaseTables( $database );
+
+                return $dbObj;
             }
             else {
                 throw new PDOException( "Unknown database in table (path: $database, table: information_schema.schemata)" );
@@ -50,14 +148,18 @@
          */
         public function sqlTable( $table, $database ) {
             $selects = implode( ',', Config::get( 'selects.table' ) );
-            $statement = $this->_pdo->prepare(
-                "SELECT $selects FROM `tables` WHERE `table_schema` = :db AND `table_name` = :table"
+            $result = $this->query(
+                "SELECT $selects FROM `tables` WHERE `table_schema` = :db AND `table_name` = :table",
+                array( 'db' => $database, 'table' => $table ),
+                \PDO::FETCH_CLASS,
+                'Belsrc\DbReflection\Reflection\ReflectionTable'
             );
-            $statement->setFetchMode( \PDO::FETCH_CLASS, 'Belsrc\DbReflection\Reflection\ReflectionTable' );
-            $result = $statement->execute( array( 'db' => $database, 'table' => $table ) );
 
             if( count( $result ) ) {
-                return $statement->fetch();
+                $dbObj = $result[0];
+                $dbObj->columns = $this->getTableColumns( $database, $table );
+
+                return $dbObj;
             }
             else {
                 throw new PDOException( "Unknown database in table (path: $database, table: information_schema.schemata)" );
@@ -74,14 +176,18 @@
          */
         public function sqlColumn( $column, $table, $database ) {
             $selects = implode( ',', Config::get( 'selects.column' ) );
-            $statement = $this->_pdo->prepare(
-                "SELECT $selects FROM `columns` WHERE `table_schema` = :db AND `table_name` = :table AND `column_name` = :column"
+            $result = $this->query(
+                "SELECT $selects FROM `columns` WHERE `table_schema` = :db AND `table_name` = :table AND `column_name` = :column",
+                array( 'db' => $database, 'table' => $table, 'column' => $column ),
+                \PDO::FETCH_CLASS,
+                'Belsrc\DbReflection\Reflection\ReflectionColumn'
             );
-            $statement->setFetchMode( \PDO::FETCH_CLASS, 'Belsrc\DbReflection\Reflection\ReflectionColumn' );
-            $result = $statement->execute( array( 'db' => $database, 'table' => $table, 'column' => $column ) );
 
             if( count( $result ) ) {
-                return $statement->fetch();
+                $dbObj = $result[0];
+                $dbObj->constraints = $this->getColumnConstraints( $database, $table, $column );
+
+                return $dbObj;
             }
             else {
                 throw new PDOException( "Unknown database in table (path: $database, table: information_schema.schemata)" );

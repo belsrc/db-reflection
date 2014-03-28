@@ -1,5 +1,5 @@
 # DbReflection
-Reflection classes for databases.
+Reflection classes for databases. [Has only been tested against MySQL]
 
 ### Install
 You can install it by downloading the [zip](https://github.com/belsrc/db-reflection/archive/master.zip) and including it in your project or, preferably, using Composer.
@@ -42,6 +42,7 @@ reflect
   | name      | mocking_db      |
   | charset   | utf8            |
   | collation | utf8_unicode_ci |
+  | tables    | 25              |
   -------------------------------
 
   php artisan reflect:table mocking_db.app_user
@@ -57,6 +58,7 @@ reflect
   | options   |                      |
   | comment   | Authorized app users |
   | database  | mocking_db           |
+  | columns   | 12                   |
   ------------------------------------
 
   php artisan reflect:column mocking_db.app_user.entity_id
@@ -70,50 +72,119 @@ reflect
   | maxLength    |                                 |
   | columnType   | int(10) unsigned                |
   | charset      |                                 |
-  | key          | PRI                             |
   | extra        | auto_increment                  |
   | privileges   | select,insert,update,references |
   | comment      |                                 |
   | table        | app_user                        |
   | database     | mocking_db                      |
+  | constraints  | Primary Key                     |
   --------------------------------------------------
 
 ```
 
-#### Reflection Classes
+#### Code Behind
 ```php
-  ReflectionDatabase::name
-  ReflectionDatabase::charset
-  ReflectionDatabase::collation
-  ReflectionDatabase::tables
+  print_r( DbReflection::getDatabase( 'mysql' ) );
+  /*
+    Belsrc\DbReflection\Reflection\ReflectionDatabase Object
+    (
+      [name] => mysql
+      [charset] => utf8
+      [collation] => utf8_general_ci
+      [tables] => Array
+      (
+        [0] => columns_priv
+        [1] => db
+        [2] => event
+        [3] => func
+        [4] => general_log
+        [5] => help_category
+        [6] => help_keyword
+        [7] => help_relation
+        [8] => help_topic
+        [9] => host
+        [10] => ndb_binlog_index
+        [11] => plugin
+        [12] => proc
+        [13] => procs_priv
+        [14] => proxies_priv
+        [15] => servers
+        [16] => slow_log
+        [17] => tables_priv
+        [18] => time_zone
+        [19] => time_zone_leap_second
+        [20] => time_zone_name
+        [21] => time_zone_transition
+        [22] => time_zone_transition_type
+        [23] => user
+      )
+    )
+   */
 
-  ReflectionTable::name
-  ReflectionTable::type
-  ReflectionTable::length
-  ReflectionTable::maxLength
-  ReflectionTable::increment
-  ReflectionTable::createdAt
-  ReflectionTable::updatedAt
-  ReflectionTable::checksum
-  ReflectionTable::options
-  ReflectionTable::comment
-  ReflectionTable::database
-  ReflectionTable::columns
+  print_r( DbReflection::getTable( 'mysql.help_topic' ) );
+  /*
+    Belsrc\DbReflection\Reflection\ReflectionTable Object
+    (
+      [name] => help_topic
+      [type] => BASE TABLE
+      [length] => 444876
+      [maxLength] => 281474976710655
+      [increment] =>
+      [createdAt] => 2012-04-19 09:45:09
+      [updatedAt] => 2012-04-19 15:45:10
+      [checksum] =>
+      [options] =>
+      [comment] => help topics
+      [database] => mysql
+      [columns] => Array
+      (
+        [0] => help_topic_id
+        [1] => name
+        [2] => help_category_id
+        [3] => description
+        [4] => example
+        [5] => url
+      )
+    )
+  */
 
-  ReflectionColumn::name
-  ReflectionColumn::position
-  ReflectionColumn::defaultValue
-  ReflectionColumn::isNullable
-  ReflectionColumn::dataType
-  ReflectionColumn::precision
-  ReflectionColumn::maxLength
-  ReflectionColumn::columnType
-  ReflectionColumn::charSet
-  ReflectionColumn::key
-  ReflectionColumn::extra
-  ReflectionColumn::privileges
-  ReflectionColumn::comment
-  ReflectionColumn::parentItem
+
+  print_r( DbReflection::getColumn( 'mysql.help_topic.help_topic_id' ) );
+  /*
+    Belsrc\DbReflection\Reflection\ReflectionColumn Object
+    (
+      [name] => help_topic_id
+      [position] => 1
+      [defaultValue] =>
+      [isNullable] => NO
+      [dataType] => int
+      [precision] => 10
+      [maxLength] =>
+      [columnType] => int(10) unsigned
+      [charSet] =>
+      [extra] =>
+      [privileges] => select,insert,update,references
+      [comment] =>
+      [table] => help_topic
+      [database] => mysql
+      [constraints] => Array
+      (
+        [0] => Belsrc\DbReflection\Reflection\ReflectionConstraint Object
+        (
+          [type] => Primary Key
+          [name] => PRIMARY
+          [column] => help_topic_id
+          [table] => help_topic
+          [database] => mysql
+          [foreign_db] =>
+          [foreign_table] =>
+          [foreign_column] =>
+        )
+      )
+    )
+  */
+
+
 ```
 
 ## License ##
