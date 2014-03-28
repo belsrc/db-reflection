@@ -25,7 +25,7 @@
         protected function getPdoConnection() {
             $default = \Config::get( 'database.default' );
             $conInfo = \Config::get( 'database.connections' )[$default];
-            $conStr  = 'mysql:host=' . $conInfo['host'] . ';dbname=information_schema';
+            $conStr  = $conInfo['driver'] . ':host=' . $conInfo['host'] . ';dbname=information_schema';
 
             return new \PDO( $conStr, $conInfo['username'], $conInfo['password'] );
         }
