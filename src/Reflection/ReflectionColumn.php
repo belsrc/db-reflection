@@ -11,7 +11,6 @@
         public $maxLength;
         public $columnType;
         public $charSet;
-        public $key;
         public $extra;
         public $privileges;
         public $comment;

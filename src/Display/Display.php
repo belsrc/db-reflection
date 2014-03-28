@@ -69,9 +69,13 @@
          */
         private function buildRow( $key, $val, $keyMax, $valMax ) {
             $keyPad = $keyMax - strlen( $key );
-
             if( is_array( $val ) ) {
-                $val = count( $val );
+                if( is_object( $val[0] ) && get_class( $val[0] ) == 'Belsrc\DbReflection\Reflection\ReflectionConstraint' ) {
+                    $val = $val[0]->type;
+                }
+                else {
+                    $val = count( $val );
+                }
             }
 
             $valPad = $valMax - strlen( $val );

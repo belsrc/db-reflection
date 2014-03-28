@@ -103,14 +103,14 @@
 
             foreach( $result as $row ) {
                 if( strtolower( $row->name ) == 'primary' ) {
-                    $row->type == $row->name;
+                    $row->type = 'Primary Key';
                 }
                 else {
-                    $row->type == 'FOREIGN';
+                    $row->type = 'Foreign Key';
                 }
             }
 
-            return $tmp;
+            return $result;
         }
 
         /**
