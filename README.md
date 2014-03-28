@@ -1,5 +1,5 @@
 # DbReflection
-Reflection classes for databases.
+Reflection classes for databases. [Has only been tested against MySQL]
 
 ### Install
 You can install it by downloading the [zip](https://github.com/belsrc/db-reflection/archive/master.zip) and including it in your project or, preferably, using Composer.
