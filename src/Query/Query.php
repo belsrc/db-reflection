@@ -93,6 +93,7 @@
          * @return array
          */
         public function getColumnConstraints( $database, $table, $column ) {
+            $tmp = array();
             $selects = implode( ',', Config::get( 'selects.constraint' ) );
             $result = $this->query(
                 "SELECT $selects FROM `key_column_usage` WHERE `table_schema` = :db AND `table_name` = :table AND `column_name` = :column",
@@ -108,9 +109,11 @@
                 else {
                     $row->type = 'Foreign Key';
                 }
+
+                $tmp[$row->name] = $row;
             }
 
-            return $result;
+            return $tmp;
         }
 
         /**
