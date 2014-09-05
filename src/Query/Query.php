@@ -130,7 +130,20 @@ class Query implements IQuery {
 
         if(count($result)) {
             $dbObj = $result[0];
-            $dbObj->tables = $this->getDatabaseTables($database);
+            $tables = $this->getDatabaseTables($database);
+
+            if(in_array('table', $with) || in_array('column', $with)) {
+                $tmp = array();
+
+                foreach($tables as $table) {
+                    $tmp[] = $this->sqlTable($table, $database, $with);
+                }
+
+                $dbObj->tables = $tmp;
+            }
+            else {
+                $dbObj->tables = $tables;
+            }
 
             return $dbObj;
         }
@@ -157,7 +170,32 @@ class Query implements IQuery {
 
         if(count($result)) {
             $dbObj = $result[0];
-            $dbObj->columns = $this->getTableColumns($database, $table);
+            $columns = $this->getTableColumns($database, $table);
+
+            if(in_array('database', $with)) {
+                $parent = $this->sqlDatabase($database, array());
+            }
+
+            // If it has a 'column' with we need to get the information for the columns
+            if(in_array('column', $with)) {
+                $tmp = array();
+                unset($with['columns']);
+                foreach($columns as $column) {
+                    $tmp[] = $this->sqlColumn($column, $table, $database, $with);
+                }
+
+                $dbObj->columns = $tmp;
+            }
+            else {
+                $dbObj->columns = $columns;
+            }
+
+            // If they decided they wanted the database from this method we need to add the table information
+            // to the 'tables' field so it all has the proper structure.
+            if(isset($parent)) {
+                $parent->tables = $dbObj;
+                return $parent;
+            }
 
             return $dbObj;
         }
@@ -186,6 +224,24 @@ class Query implements IQuery {
         if(count($result)) {
             $dbObj = $result[0];
             $dbObj->constraints = $this->getColumnConstraints($database, $table, $column);
+
+            if(in_array('database', $with)) {
+                $grandparent = $this->sqlDatabase($database, array());
+            }
+
+            if(in_array('table', $with) || in_array('database', $with)) {
+                $parent = $this->sqlTable($table, $database, array());
+            }
+
+            if(isset($parent)) {
+                $parent->columns = $dbObj;
+                if(isset($grandparent)) {
+                    $grandparent->tables = $parent;
+                    return $grandparent;
+                }
+
+                return $parent;
+            }
 
             return $dbObj;
         }

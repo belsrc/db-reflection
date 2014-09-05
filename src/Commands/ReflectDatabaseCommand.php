@@ -30,8 +30,9 @@ class ReflectDatabaseCommand extends BaseReflectCommand {
         try {
             $pdo  = $this->getPdoConnection();
             $name = $this->argument('name');
+            $with = $this->option('with');
             $dbr  = new DbReflection(new Query($pdo));
-            $tmp  = $dbr->getDatabase($name);
+            $tmp  = $dbr->getDatabase($name, $with);
 
             echo $this->_display->display($tmp);
         }
@@ -48,7 +49,7 @@ class ReflectDatabaseCommand extends BaseReflectCommand {
      */
     protected function getArguments() {
         return array(
-            array('name', InputArgument::REQUIRED, "The name of the database.")
+            array('name', InputArgument::REQUIRED, "The name of the database."),
         );
     }
 
@@ -58,6 +59,8 @@ class ReflectDatabaseCommand extends BaseReflectCommand {
      * @return array
      */
     protected function getOptions() {
-        return array();
+        return array(
+            array('with', null, InputOption::VALUE_IS_ARRAY, "With Table or Column."),
+        );
     }
 }
