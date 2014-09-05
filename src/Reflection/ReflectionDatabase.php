@@ -1,10 +1,10 @@
 <?php namespace Belsrc\DbReflection\Reflection;
 
-    class ReflectionDatabase {
+class ReflectionDatabase {
 
-        public $name;
-        public $charset;
-        public $collation;
+    public $name;
+    public $charset;
+    public $collation;
 
-        public $tables;
-    }
+    public $tables;
+}
